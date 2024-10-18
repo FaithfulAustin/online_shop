@@ -1,21 +1,18 @@
-import mongoose, { Schema, model } from "mongoose";
-import Product from "../Interfaces/Product.Interface";
+import mongoose, { Schema, model } from 'mongoose';
 
-
-// import bcrypt from "bcrypt"
+interface Product {
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+}
 
 const productSchema = new Schema<Product>({
- 
-    name: {
-        type: String,
-        required: true,
-    },
-    price: {
-        type: Number,
-        required: true,
-    },
+  name: { type: String, required: true },
+  description: { type: String, required: true },
+  price: { type: Number, required: true },
+  stock: { type: Number, required: true, default: 0 },
+});
 
-})
-
-const ProductModel = model<Product>("products", productSchema)
-export default ProductModel
+const ProductModel = model<Product>('Product', productSchema);
+export default ProductModel;
