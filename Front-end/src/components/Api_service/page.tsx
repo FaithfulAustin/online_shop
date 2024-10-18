@@ -17,7 +17,7 @@ export const ApiService = async (
     headers: Record<string, string>,
     method: Method = 'POST'  // Default to 'POST', but can be set to 'GET'
 ) => {
-    const baseUrl = "http://localhost:4000"
+    const baseUrl = "https://online-shop-dcx5.onrender.com"
     try {
         let response;
         if (method === 'POST') {
