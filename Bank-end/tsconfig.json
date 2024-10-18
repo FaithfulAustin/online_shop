@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+      "experimentalDecorators": true,
+      "target": "ES2017",
+      "allowSyntheticDefaultImports": true,
+      "strict": true,
+      "rootDir": "./src","noImplicitAny": true,"noUncheckedIndexedAccess": true,
+      "outDir": "dist",
+      "esModuleInterop": true,
+      "moduleResolution": "Node10"
+  }
+}
