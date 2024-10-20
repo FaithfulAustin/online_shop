@@ -17,7 +17,8 @@ export const ApiService = async (
     headers: Record<string, string>,
     method: Method = 'POST'  // Default to 'POST', but can be set to 'GET'
 ) => {
-    const baseUrl = "https://online-shop-dcx5.onrender.com"
+     const baseUrl = "https://online-shop-dcx5.onrender.com"
+    //  const baseUrl = "http://localhost:4000"
     try {
         let response;
         if (method === 'POST') {
@@ -31,7 +32,11 @@ export const ApiService = async (
         } else if (method === 'GET') {
             const params = requestData || {};  // For GET, we use requestData as query params
             response = await axios.get(`${baseUrl}/${path}`, { headers, params });
-        } else {
+        } else if (method === 'DELETE') {
+            const params = requestData || {};  
+            response = await axios.delete(`${baseUrl}/${path}`, { headers, params });
+        } 
+        else {
             throw new Error(`Unsupported method: ${method}`);
         }
 

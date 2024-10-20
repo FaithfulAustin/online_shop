@@ -6,6 +6,7 @@
   "scripts": {
     "start": "ts-node ./src/Server.ts",
     "test": "npm run dev",
+    "seed": "ts-node ./src/Utills/seedProduct.ts",
     "dev": "nodemon ./src/index.ts"
   },
   "author": "",

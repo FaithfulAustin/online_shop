@@ -1,44 +1,83 @@
 
-// import { NextFunction, Request, Response } from "express";
-// import { StatusCodes } from "http-status-codes";
-// import { validate } from "class-validator";
-// import HttpResponse from "../Response/HttpResponse";
-// import HttpException from "../Error/HttpException";
-// import CartModel from '../Modals/CartModal';
+import { NextFunction, Request, Response } from "express";
+import { StatusCodes } from "http-status-codes";
+import { validate } from "class-validator";
+import HttpResponse from "../Response/HttpResponse";
+import HttpException from "../Error/HttpException";
+import CartModel from '../Modals/CartModal';
+import CartService from "../Services/Cart.service";
+import { CartDto } from "../Dto/CartDto";
 
-// export default class CartController {
-//   public async addToCart(req: Request, res: Response, next: NextFunction) {
-//     try {
-//       const { productId, quantity } = req.body;
-//       const userId = req.userId; // assuming userId is attached to req from JWT middleware
+export default class CartController {
+    private readonly cartService: CartService;
 
-//       let cart = await CartModel.findOne({ userId });
+    constructor() {
+        this.cartService = new CartService();
+    }
 
-//       if (!cart) {
-//         cart = new CartModel({ userId, items: [{ productId, quantity }] });
-//       } else {
-//         const itemIndex = cart.items.findIndex(item => item.productId === productId);
-//         if (itemIndex > -1) {
-//           cart.items[itemIndex].quantity += quantity;
-//         } else {
-//           cart.items.push({ productId, quantity });
-//         }
-//       }
+    public addToCart = async (
+        request: Request,
+        response: Response,
+        next: NextFunction
+    ) => {
+        try {
+            const token = request.headers.authorization
+            if (!token) throw new HttpException(StatusCodes.BAD_REQUEST, "Authorization header needed")
 
-//       await cart.save();
-//       res.status(201).json({ message: 'Item added to cart', cart });
-//     } catch (err) {
-//       next(err);
-//     }
-//   }
+            const cartDtoObj = new CartDto();
 
-//   public async getCart(req: Request, res: Response, next: NextFunction) {
-//     try {
-//       const userId = req.userId;
-//       const cart = await CartModel.findOne({ userId }).populate('items.productId');
-//       res.status(200).json({ cart });
-//     } catch (err) {
-//       next(err);
-//     }
-//   }
-// }
+            cartDtoObj.productId = request.body.productId;
+            cartDtoObj.qty = request.body.qty;
+
+            const errors = await validate(cartDtoObj)
+            if (errors.length !== 0) {
+                throw new HttpException(StatusCodes.BAD_REQUEST, errors.flatMap(err => Object.values(err.constraints ?? {})));
+            }
+
+            const data = await this.cartService.addToCart(cartDtoObj, token);
+            return response.status(StatusCodes.OK).send(new HttpResponse("success", "Items: ", data))
+
+
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    public getAllItemUser = async (
+        request: Request,
+        response: Response,
+        next: NextFunction
+    ) => {
+        try {
+            const token = request.headers.authorization
+            if (!token) throw new HttpException(StatusCodes.BAD_REQUEST, "Authorization header needed")
+
+            const data = await this.cartService.getAllItemUser(token);
+            return response.status(StatusCodes.OK).send(new HttpResponse("success", "Items: ", data))
+
+
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    public deleteCartItem = async (
+        request: Request,
+        response: Response,
+        next: NextFunction,
+    ) => {
+        try {
+           
+            const itemId= request.params.id as string;
+            const data = await this.cartService.deleteCartItem(itemId);
+            return response.status(StatusCodes.OK).send(new HttpResponse("success", "Item: ", data))
+    
+        }
+        catch (err: unknown) {
+            next(err);
+        }
+    
+    }
+    
+}
+

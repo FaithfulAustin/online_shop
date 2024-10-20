@@ -3,30 +3,80 @@
 import Link from 'next/link';
 import '../../styles/globals.css';
 import { useEffect, useState } from 'react'
+import LoaderModal from "../loaderModal/LoaderComponent";
+import { ApiService } from '../Api_service/page';
+import { useRouter } from 'next/router';
+
+
 
 interface ProductCardProps {
   productName: string;
   price: number;
   img: string;
+  id: string;
 }
 
-const Productmodal: React.FC<ProductCardProps> = ({ productName, price, img }) => {
+const Productmodal: React.FC<ProductCardProps> = ({ productName, price, img,id }) => {
 
   const [isModalOpen, setisModalOpen] = useState(true)
- 
+  const [isLoading, setIsLoading] = useState(false);
 
+  const [qty, setQty] = useState(1)
+  const formData = {
+    productId: id,
+    qty: qty,
+  }
+  const router = useRouter();
+
+  const addToCart = async (qty: number, id: string) => {
+
+    setIsLoading(true);
+    console.log(formData.productId);
+    console.log(formData.qty);
+    
+    const auth = localStorage.getItem('token');
+    const headers = {
+        "Content-type": "application/json",
+        "Authorization": `Bearer ${auth}`
+    }
+    const response = await ApiService(formData, "cart/addToCart", headers, "POST");
+    if (response.data.status === "success") {
+        console.log(response.data.data);
+        setIsLoading(false);
+        router.push('/products');
+    }else{
+      // router.push('/products');
+
+    }
+
+  }
+  const increase = () => {
+    setQty(qty+1);
+
+}
+const decrease = () => {
+  if(qty > 1) {
+    setQty(qty-1);
+  }else{
+    setQty(1);
+
+  }
+
+}
   return (
     <>
+      {isLoading && <LoaderModal />}
 
       {isModalOpen &&
         <div className=" relative z-10" role="dialog" aria-modal="true">
+
 
           <div className="fixed inset-0 hidden bg-gray-500 bg-opacity-75 transition-opacity md:block" aria-hidden="true"></div>
 
           <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
             <div className="flex min-h-full items-stretch justify-center text-center md:items-center md:px-2 lg:px-4">
 
-              <div  className="flex w-full transform text-left text-base transition md:my-8 md:max-w-2xl md:px-4 lg:max-w-4xl">
+              <div className="flex w-full transform text-left text-base transition md:my-8 md:max-w-2xl md:px-4 lg:max-w-4xl">
 
                 <div className="  relative flex w-full items-center overflow-hidden bg-white px-4 pb-8 pt-14 shadow-2xl sm:px-6 sm:pt-8 md:p-6 lg:p-8">
                   <button type="button" className="absolute right-4 top-4 text-gray-400 hover:text-gray-500 sm:right-6 sm:top-8 md:right-6 md:top-6 lg:right-8 lg:top-8">
@@ -47,6 +97,12 @@ const Productmodal: React.FC<ProductCardProps> = ({ productName, price, img }) =
                         <h3 id="information-heading" className="sr-only">Product information</h3>
 
                         <p className="text-2xl text-gray-900">${price}</p>
+                        <div className='w-4/4 mt-10 border-2 h-20 border-black flex items-center justify-between px-2'>
+                        <span className='text-5xl cursor-pointer'  onClick={() => decrease()}>-</span>
+                        <span className='text-4xl' >{qty}</span>
+                        <span className='text-5xl cursor-pointer' onClick={() => increase()}>+</span>
+
+                        </div>
 
                         {/* <div className="mt-6">
                           <h4 className="sr-only">Reviews</h4>
@@ -78,7 +134,7 @@ const Productmodal: React.FC<ProductCardProps> = ({ productName, price, img }) =
                       <section aria-labelledby="options-heading" className="mt-10">
                         <h3 id="options-heading" className="sr-only">Product options</h3>
 
-                        <form>
+                        <form  >
 
                           {/* <fieldset aria-label="Choose a color">
                             <legend className="text-sm font-medium text-gray-900">Color</legend>
@@ -158,7 +214,7 @@ const Productmodal: React.FC<ProductCardProps> = ({ productName, price, img }) =
                             </div>
                           </fieldset> */}
 
-                          <button type="submit" className="mt-6 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">Add to Cart</button>
+                          <button  onClick={() => addToCart(qty,id)} className="mt-6 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ">Add to Cart</button>
                         </form>
                       </section>
                     </div>

@@ -1,10 +1,13 @@
 import express, { NextFunction, Request, response, Response } from "express"
 import { connectDB } from "./Config/index";
 import authRouter from "./Route/AuthRoute";
+import productRouter from "./Route/ProductRoute";
 import cors from "cors";
 import HttpException from "./Error/HttpException";
 import { StatusCodes } from "http-status-codes";
 import HttpResponse from "./Response/HttpResponse";
+import seedProducts from "./Utills/seedProduct";
+import cartRouter from "./Route/CartRoute";
 
 const port = 4000;
 
@@ -31,6 +34,8 @@ export class Server {
 
         }))
         this.app.use('/auth', authRouter);
+        this.app.use('/product', productRouter);
+        this.app.use('/cart', cartRouter);
 
 
         this.app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -75,7 +80,10 @@ export class Server {
 
 
 
-    private async DBconnection() { connectDB() }
+    private async DBconnection() { 
+        connectDB(); 
+        await seedProducts(); 
+    }
 
 }
 
